@@ -154,6 +154,11 @@ if(typeof supabase === 'undefined'){
   });
   throw new Error('supabase-js no cargó');
 }
+window.addEventListener('error', (e)=>{ alert('Error JS: ' + e.message); });
+window.addEventListener('unhandledrejection', (e)=>{
+  const msg = (e.reason && e.reason.message) ? e.reason.message : String(e.reason);
+  alert('Error async: ' + msg);
+});
 const SB_URL = 'https://izcdshazwgdnimusyhzl.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6Y2RzaGF6d2dkbmltdXN5aHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTk2NjIsImV4cCI6MjEwNTY5NTY2Mn0.7hixvYjk0kiO8rR-HGnfgseDgQNBY8pPaeBKtLyx4Y0';
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -613,3 +618,4 @@ document.querySelectorAll('.roles button').forEach(btn=>{
 </script>
 </body>
 </html>
+
