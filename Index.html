@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototipo · Gestión de Alumnos</title>
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkdlc3Rpw7NuIGRlIEFsdW1ub3MiLAogICJzaG9ydF9uYW1lIjogIkFsdW1ub3MiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y1ZjZmOCIsCiAgInRoZW1lX2NvbG9yIjogIiM0ZjQ2ZTUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0OGNtVmpkQ0IzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSWdjbmc5SWprMklpQm1hV3hzUFNJak5HWTBObVUxSWk4K1BIUmxlSFFnZUQwaU1qVTJJaUI1UFNJek5EQWlJR1p2Ym5RdGMybDZaVDBpTWpZd0lpQjBaWGgwTFdGdVkyaHZjajBpYldsa1pHeGxJaUJtYjI1MExXWmhiV2xzZVQwaWMyRnVjeTF6WlhKcFppSSs4SitQaSsrNGp6d3ZkR1Y0ZEQ0OEwzTjJaejRLIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQo=">
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alumnos">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9Ijk2IiBmaWxsPSIjNGY0NmU1Ii8+PHRleHQgeD0iMjU2IiB5PSIzNDAiIGZvbnQtc2l6ZT0iMjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+8J+Pi++4jzwvdGV4dD48L3N2Zz4K">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --text:#1a1d23; --sub:#6b7280;
+  --accent:#4f46e5; --accent2:#059669; --warn:#d97706; --danger:#dc2626;
+  --border:#e5e7eb;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171c; --card:#1f2229; --text:#eef0f3; --sub:#9aa1ad; --border:#30343d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171c; --card:#1f2229; --text:#eef0f3; --sub:#9aa1ad; --border:#30343d;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+*{box-sizing:border-box;}
+body{
+  margin:0; height:100%; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+header{
+  position:sticky; top:0; z-index:10;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px;
+  background:var(--card); border-bottom:1px solid var(--border);
+}
+header h1{margin:0 0 10px; font-size:17px;}
+.roles{display:flex; gap:6px;}
+.roles button{
+  flex:1; padding:8px 6px; border-radius:8px; border:1px solid var(--border);
+  background:var(--bg); color:var(--text); font-size:13px; cursor:pointer;
+}
+.roles button.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+main{padding:16px; max-width:480px; margin:0 auto; padding-bottom:40px;}
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:16px; margin-bottom:14px;
+}
+.card h2{margin:0 0 10px; font-size:15px;}
+.row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:14px;}
+.sub{color:var(--sub); font-size:12px;}
+.badge{padding:3px 9px; border-radius:20px; font-size:12px; font-weight:600;}
+.badge.ok{background:#05966922; color:var(--accent2);}
+.badge.warn{background:#d9770622; color:var(--warn);}
+.badge.danger{background:#dc262622; color:var(--danger);}
+.btn{
+  width:100%; padding:10px; border-radius:8px; border:none;
+  background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:6px;
+}
+.btn.secondary{background:transparent; border:1px solid var(--border); color:var(--text);}
+ul{margin:0; padding-left:18px; font-size:13px;}
+li{margin-bottom:6px;}
+.qr{
+  width:150px; height:150px; margin:10px auto; border-radius:8px;
+  background:
+    repeating-linear-gradient(0deg, var(--text) 0 6px, transparent 6px 12px),
+    repeating-linear-gradient(90deg, var(--text) 0 6px, transparent 6px 12px);
+  background-blend-mode:multiply; opacity:0.85;
+}
+.hidden{display:none;}
+table{width:100%; border-collapse:collapse; font-size:13px;}
+td,th{padding:6px 4px; border-bottom:1px solid var(--border); text-align:left;}
+input,select,textarea{
+  width:100%; padding:8px; border-radius:6px; border:1px solid var(--border);
+  background:var(--bg); color:var(--text); font-size:13px; margin-top:4px;
+}
+label{font-size:12px; color:var(--sub); display:block; margin-top:8px;}
+.msg{font-size:12px; color:var(--accent2); margin-top:6px;}
+#loginScreen{
+  min-height:100%; display:flex; align-items:center; justify-content:center; padding:24px;
+}
+#loginScreen .card{width:100%; max-width:340px;}
+.errmsg{font-size:12px; color:var(--danger); margin-top:6px;}
+</style>
+</head>
+<body>
+<div id="loginScreen">
+  <div class="card" id="loginCard">
+    <h2>🏋️ Iniciar sesión</h2>
+    <label>Email</label>
+    <input id="loginEmail" type="email" placeholder="tu@email.com">
+    <label>Contraseña</label>
+    <input id="loginPassword" type="password" placeholder="••••••••">
+    <button type="button" class="btn secondary" id="togglePass" style="margin-top:4px;">Mostrar contraseña</button>
+    <button class="btn" id="loginBtn">Ingresar</button>
+    <div id="loginError" class="errmsg hidden"></div>
+    <div class="sub" style="margin-top:10px; text-align:center;">
+      <a href="#" id="showForgot">¿Olvidaste tu contraseña?</a> · <a href="#" id="showSignup">Crear cuenta</a>
+    </div>
+  </div>
+  <div class="card hidden" id="signupCard">
+    <h2>Crear cuenta</h2>
+    <label>Email</label>
+    <input id="signupEmail" type="email" placeholder="tu@email.com">
+    <label>Contraseña</label>
+    <input id="signupPassword" type="password" placeholder="••••••••">
+    <button class="btn" id="signupBtn">Registrarme</button>
+    <div id="signupMsg" class="msg hidden"></div>
+    <div id="signupError" class="errmsg hidden"></div>
+    <div class="sub" style="margin-top:10px;text-align:center;"><a href="#" id="showLoginFromSignup">Volver a iniciar sesión</a></div>
+  </div>
+  <div class="card hidden" id="forgotCard">
+    <h2>Recuperar contraseña</h2>
+    <label>Email</label>
+    <input id="forgotEmail" type="email" placeholder="tu@email.com">
+    <button class="btn" id="forgotBtn">Enviar link de recuperación</button>
+    <div id="forgotMsg" class="msg hidden"></div>
+    <div id="forgotError" class="errmsg hidden"></div>
+    <div class="sub" style="margin-top:10px;text-align:center;"><a href="#" id="showLoginFromForgot">Volver a iniciar sesión</a></div>
+  </div>
+  <div class="card hidden" id="resetCard">
+    <h2>Elegir nueva contraseña</h2>
+    <label>Contraseña nueva</label>
+    <input id="resetPassword" type="password" placeholder="••••••••">
+    <button class="btn" id="resetBtn">Guardar nueva contraseña</button>
+    <div id="resetMsg" class="msg hidden"></div>
+    <div id="resetError" class="errmsg hidden"></div>
+  </div>
+</div>
+<div id="app" class="hidden">
+<header>
+  <h1>🏋️ Prototipo — App de Gestión</h1>
+  <div class="roles">
+    <button data-role="alumno" class="active">Alumno</button>
+    <button data-role="profesor">Profesor</button>
+    <button data-role="director">Director</button>
+  </div>
+</header>
+<main id="main"></main>
+</div>
+
+<script>
+const SB_URL = 'https://izcdshazwgdnimusyhzl.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6Y2RzaGF6d2dkbmltdXN5aHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTk2NjIsImV4cCI6MjEwNTY5NTY2Mn0.7hixvYjk0kiO8rR-HGnfgseDgQNBY8pPaeBKtLyx4Y0';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+const state = {
+  role: 'alumno',
+  alumno: {
+    nombre: 'Juan Pérez',
+    categoria: 'Adultos · Grupo Boxeo',
+    contacto: { tel:'+54 9 11 5555-1234', email:'juan.perez@mail.com' },
+    cuota: { activa:true, plan:'8 clases/mes', usadas:5, total:8, recuperables:1 },
+    pagos: [
+      {mes:'Agosto 2026', monto:'$18.000', estado:'Pagado'},
+      {mes:'Julio 2026', monto:'$18.000', estado:'Pagado'},
+    ],
+    horarios: ['Lun 18:00 Funcional','Mié 18:00 Funcional','Vie 19:00 Boxeo'],
+    faltadas: [
+      {clase:'Vie 19:00 Boxeo', fecha:'12/09', recuperada:false},
+    ],
+    promos: ['15% off pagando antes del día 5', '2do familiar con 20% off'],
+  },
+  profesor: {
+    nombre: 'Prof. Ana Gómez',
+    clases: [
+      {dia:'Hoy 18:00', nombre:'Funcional', alumnos:12, asistieron:null, extras:[],
+        listado:[
+          {nombre:'Juan Pérez', presente:null, recuperando:false, promo:'15% off', debeCuota:false},
+          {nombre:'Marcos Díaz', presente:null, recuperando:false, promo:null, debeCuota:true},
+          {nombre:'Sofía Ruiz', presente:null, recuperando:true, promo:null, debeCuota:false},
+        ]},
+      {dia:'Mié 18:00', nombre:'Funcional', alumnos:10, asistieron:null, extras:[],
+        listado:[
+          {nombre:'Camila Torres', presente:null, recuperando:false, promo:null, debeCuota:false},
+          {nombre:'Lucas Fernández', presente:null, recuperando:false, promo:'2do familiar', debeCuota:false},
+        ]},
+    ],
+    devoluciones: [
+      {alumno:'Juan Pérez', clase:'Boxeo 12/09', estado:'Pendiente'},
+    ],
+  },
+  director: {
+    profesoresMock: [
+      {nombre:'Prof. Ana Gómez', clasesDictadas:14, sueldoEstimado:'$84.000'},
+      {nombre:'Prof. Luis Ríos', clasesDictadas:9, sueldoEstimado:'$54.000'},
+    ],
+    rubrosDisponibles: ['Gym','Escuela de danza','Escuela convencional','Escuela de teatro','Escuela de arte'],
+    categorias: [],       // se carga desde Supabase
+    profesoresDB: [],     // se carga desde Supabase
+    horarios: [],         // se carga desde Supabase (tabla clases)
+    promociones: ['15% off pagando antes del día 5', '2do familiar con 20% off'],
+    eventos: [],
+    alumnos: [
+      {nombre:'Juan Pérez', cuotaPagada:true, clasesAsistidas:1, clasesTotales:8, beneficio:null},
+      {nombre:'Marcos Díaz', cuotaPagada:true, clasesAsistidas:0, clasesTotales:8, beneficio:null},
+      {nombre:'Sofía Ruiz', cuotaPagada:true, clasesAsistidas:6, clasesTotales:8, beneficio:null},
+    ],
+  }
+};
+
+async function cargarDatosDirector(){
+  const {data: cats} = await sb.from('categorias').select('*').order('nombre');
+  state.director.categorias = cats || [];
+  const {data: profs} = await sb.from('profesores').select('*').order('nombre');
+  state.director.profesoresDB = profs || [];
+  const {data: clases} = await sb.from('clases').select('*, profesores(nombre)').order('dia');
+  state.director.horarios = (clases||[]).map(c=>({
+    id:c.id, dia:c.dia, horario:c.horario, actividad:c.actividad,
+    profesor_id:c.profesor_id, profesor_nombre: (c.profesores && c.profesores.nombre) || 'Sin asignar'
+  }));
+  render();
+}
+
+async function login(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.classList.add('hidden');
+  const {data, error} = await sb.auth.signInWithPassword({email, password});
+  if(error){ errEl.textContent = 'Error: ' + error.message; errEl.classList.remove('hidden'); return; }
+  await onLoggedIn(data.user);
+}
+
+async function onLoggedIn(user){
+  const {data: perfil} = await sb.from('perfiles').select('rol').eq('id', user.id).single();
+  state.role = perfil ? perfil.rol : 'alumno';
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.querySelectorAll('.roles button').forEach(b=>b.classList.toggle('active', b.dataset.role===state.role));
+  if(state.role==='director') await cargarDatosDirector();
+  render();
+}
+
+document.getElementById('loginBtn').onclick = login;
+document.getElementById('togglePass').onclick = ()=>{
+  const pass = document.getElementById('loginPassword');
+  const btn = document.getElementById('togglePass');
+  const shown = pass.type === 'text';
+  pass.type = shown ? 'password' : 'text';
+  btn.textContent = shown ? 'Mostrar contraseña' : 'Ocultar contraseña';
+};
+
+function showCard(id){
+  ['loginCard','signupCard','forgotCard','resetCard'].forEach(c=>
+    document.getElementById(c).classList.toggle('hidden', c!==id));
+}
+document.getElementById('showForgot').onclick = e=>{e.preventDefault(); showCard('forgotCard');};
+document.getElementById('showSignup').onclick = e=>{e.preventDefault(); showCard('signupCard');};
+document.getElementById('showLoginFromSignup').onclick = e=>{e.preventDefault(); showCard('loginCard');};
+document.getElementById('showLoginFromForgot').onclick = e=>{e.preventDefault(); showCard('loginCard');};
+
+document.getElementById('signupBtn').onclick = async ()=>{
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const errEl = document.getElementById('signupError'); const msgEl = document.getElementById('signupMsg');
+  errEl.classList.add('hidden'); msgEl.classList.add('hidden');
+  const {error} = await sb.auth.signUp({email, password});
+  if(error){ errEl.textContent = 'Error: ' + error.message; errEl.classList.remove('hidden'); return; }
+  msgEl.textContent = 'Listo. Revisá tu correo y confirmá la cuenta antes de ingresar.';
+  msgEl.classList.remove('hidden');
+};
+
+document.getElementById('forgotBtn').onclick = async ()=>{
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errEl = document.getElementById('forgotError'); const msgEl = document.getElementById('forgotMsg');
+  errEl.classList.add('hidden'); msgEl.classList.add('hidden');
+  const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: window.location.href});
+  if(error){ errEl.textContent = 'Error: ' + error.message; errEl.classList.remove('hidden'); return; }
+  msgEl.textContent = 'Te enviamos un correo con el link para restablecer tu contraseña.';
+  msgEl.classList.remove('hidden');
+};
+
+document.getElementById('resetBtn').onclick = async ()=>{
+  const password = document.getElementById('resetPassword').value;
+  const errEl = document.getElementById('resetError'); const msgEl = document.getElementById('resetMsg');
+  errEl.classList.add('hidden'); msgEl.classList.add('hidden');
+  const {error} = await sb.auth.updateUser({password});
+  if(error){ errEl.textContent = 'Error: ' + error.message; errEl.classList.remove('hidden'); return; }
+  msgEl.textContent = 'Contraseña actualizada. Ya podés cerrar esto e iniciar sesión con la nueva.';
+  msgEl.classList.remove('hidden');
+};
+
+sb.auth.onAuthStateChange((event)=>{
+  if(event === 'PASSWORD_RECOVERY') showCard('resetCard');
+});
+sb.auth.getSession().then(({data})=>{
+  if(data.session) onLoggedIn(data.session.user);
+});
+
+
+function render(){
+  const main = document.getElementById('main');
+  main.innerHTML = state.role === 'alumno' ? viewAlumno()
+    : state.role === 'profesor' ? viewProfesor()
+    : viewDirector();
+  attachHandlers();
+}
+
+function viewAlumno(){
+  const a = state.alumno;
+  const pct = Math.round((a.cuota.usadas/a.cuota.total)*100);
+  return `
+  <div class="card">
+    <h2>Hola, ${a.nombre}</h2>
+    <div class="row"><span>Cuota</span>
+      <span class="badge ${a.cuota.activa?'ok':'danger'}">${a.cuota.activa?'Al día':'Vencida'}</span>
+    </div>
+    <div class="sub">${a.cuota.plan} — usadas ${a.cuota.usadas}/${a.cuota.total} (${pct}%)</div>
+    <div class="sub">Clases recuperables este mes: ${a.cuota.recuperables}</div>
+    <button class="btn" id="pagarBtn">Pagar cuota</button>
+    <div id="pagoMsg" class="msg hidden">✔ Pago simulado registrado</div>
+  </div>
+  <div class="card">
+    <h2>Mi QR del mes</h2>
+    <div class="qr"></div>
+    <div class="sub" style="text-align:center">Válido para asistencia y pago — descuenta clases automáticamente</div>
+  </div>
+  <div class="card">
+    <h2>Horarios de mis clases</h2>
+    <ul>${a.horarios.map(h=>`<li>${h}</li>`).join('')}</ul>
+  </div>
+  <div class="card">
+    <h2>Historial de pagos</h2>
+    <table><tr><th>Mes</th><th>Monto</th><th>Estado</th></tr>
+    ${a.pagos.map(p=>`<tr><td>${p.mes}</td><td>${p.monto}</td><td>${p.estado}</td></tr>`).join('')}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Recuperar clases</h2>
+    <div class="sub">Se pueden recuperar dentro del mismo mes; si no, se pierden</div>
+    ${a.faltadas.map((f,i)=>`
+    <div class="row">
+      <span>${f.clase} <span class="sub">(${f.fecha})</span></span>
+      ${f.recuperada
+        ? '<span class="badge ok">Recuperada</span>'
+        : `<button class="btn secondary recuperarBtn" data-i="${i}" style="width:auto; margin:0;">Recuperar</button>`}
+    </div>`).join('') || '<div class="sub">No tenés clases pendientes de recuperar</div>'}
+  </div>
+  <div class="card">
+    <h2>Promociones</h2>
+    <ul>${a.promos.map(p=>`<li>${p}</li>`).join('')}</ul>
+  </div>
+  <div class="card">
+    <h2>Mis datos</h2>
+    <div class="row"><span>Categoría</span><span class="sub">${a.categoria}</span></div>
+    <div class="row"><span>Tel</span><span class="sub">${a.contacto.tel}</span></div>
+    <div class="row"><span>Email</span><span class="sub">${a.contacto.email}</span></div>
+  </div>`;
+}
+
+function viewProfesor(){
+  const p = state.profesor;
+  return `
+  <div class="card">
+    <h2>${p.nombre}</h2>
+    <div class="sub">Marcá asistencia o avisá si no vas a dictar la clase</div>
+  </div>
+  ${p.clases.map((c,i)=>`
+  <div class="card">
+    <h2>${c.nombre} — ${c.dia}</h2>
+    <div class="sub">${c.alumnos} alumnos inscriptos</div>
+    <div class="row">
+      <span>Estado</span>
+      <span class="badge ${c.asistieron===null?'warn':'ok'}">${c.asistieron===null?'Pendiente':'Registrado'}</span>
+    </div>
+    <button class="btn tomarAsist" data-i="${i}">Tomar asistencia</button>
+    <button class="btn secondary noDicto" data-i="${i}">Avisar que no dicto la clase</button>
+    <div class="sub" style="margin-top:12px">Listado de alumnos (orden alfabético)</div>
+    ${[...c.listado].sort((x,y)=>x.nombre.localeCompare(y.nombre)).map(al=>{
+      const idx = c.listado.indexOf(al);
+      return `
+    <div class="row">
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; margin:0;">
+        <input type="checkbox" class="presenteCheck" data-i="${i}" data-idx="${idx}" ${al.presente?'checked':''} style="width:auto; margin:0;">
+        ${al.nombre}
+      </label>
+      <span>
+        ${al.recuperando?'<span class="badge warn">Recupera</span>':''}
+        ${al.promo?'<span class="badge ok">Promo</span>':''}
+        ${al.debeCuota?'<span class="badge danger">Debe cuota</span>':''}
+      </span>
+    </div>`;}).join('')}
+    ${c.extras.length?`<div class="sub" style="margin-top:10px">Alumnos agregados hoy</div>
+      ${c.extras.map(e=>`<div class="row"><span>${e.nombre}</span>
+        ${e.estado==='compromiso'
+          ? `<button class="btn secondary registrarPago" data-i="${i}" data-nombre="${e.nombre}" style="width:auto;margin:0;">Registrar pago</button>`
+          : '<span class="badge ok">Pagado</span>'}
+      </div>`).join('')}` : ''}
+    <label>Agregar alumno a esta clase</label>
+    <input class="nuevoAlumnoNombre" data-i="${i}" placeholder="Nombre del alumno">
+    <select class="nuevoAlumnoEstado" data-i="${i}">
+      <option value="pagado">Pagó / tiene cuota</option>
+      <option value="compromiso">Sin abonar — compromiso de pago</option>
+    </select>
+    <button class="btn secondary agregarAlumnoBtn" data-i="${i}">+ Agregar a la clase</button>
+  </div>`).join('')}
+  <div class="card">
+    <h2>Devoluciones pendientes</h2>
+    ${p.devoluciones.map(d=>`<div class="row"><span>${d.alumno} — ${d.clase}</span><span class="badge warn">${d.estado}</span></div>`).join('') || '<div class="sub">Sin devoluciones pendientes</div>'}
+  </div>`;
+}
+
+function viewDirector(){
+  const d = state.director;
+  return `
+  <div class="card">
+    <h2>Clases dictadas (para sueldos) <span class="sub">— dato de ejemplo</span></h2>
+    <table><tr><th>Profesor</th><th>Clases</th><th>Sueldo est.</th></tr>
+    ${d.profesoresMock.map(p=>`<tr><td>${p.nombre}</td><td>${p.clasesDictadas}</td><td>${p.sueldoEstimado}</td></tr>`).join('')}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Profesores</h2>
+    ${d.profesoresDB.map(p=>`<div class="row"><span>${p.nombre}</span></div>`).join('') || '<div class="sub">Todavía no cargaste profesores</div>'}
+    <label>Nombre del nuevo profesor</label>
+    <input id="nuevoProfesorNombre" placeholder="Ej: Prof. Ana Gómez">
+    <button class="btn secondary" id="agregarProfesor">+ Agregar profesor</button>
+  </div>
+  <div class="card">
+    <h2>Categorías (por rubro)</h2>
+    ${d.categorias.map(c=>`<div class="row"><span>${c.nombre} <span class="sub">(${c.rubro})</span></span><button class="btn secondary borrarCategoria" data-id="${c.id}" style="width:auto;margin:0;">✕</button></div>`).join('') || '<div class="sub">Todavía no cargaste categorías</div>'}
+    <label>Rubro</label>
+    <select id="rubroCategoria">${d.rubrosDisponibles.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+    <label>Nueva categoría</label>
+    <input id="nuevaCategoria" placeholder="Ej: Jazz, Adultos · Boxeo...">
+    <button class="btn secondary" id="agregarCategoria">+ Agregar categoría</button>
+  </div>
+  <div class="card">
+    <h2>Días, horarios y profesores</h2>
+    ${d.horarios.map(h=>`
+    <div class="row">
+      <span>${h.dia} ${h.horario} — ${h.actividad}</span>
+      <button class="btn secondary borrarHorario" data-id="${h.id}" style="width:auto;margin:0;">✕</button>
+    </div>
+    <select class="asignarProfesor" data-id="${h.id}">
+      <option value="">Sin asignar</option>
+      ${d.profesoresDB.map(p=>`<option value="${p.id}" ${p.id===h.profesor_id?'selected':''}>${p.nombre}</option>`).join('')}
+    </select>`).join('') || '<div class="sub">Todavía no cargaste clases</div>'}
+    <label>Nueva clase</label>
+    <input id="nuevoDia" placeholder="Día (ej: Martes)">
+    <input id="nuevoHorario" placeholder="Horario (ej: 19:00)">
+    <input id="nuevaActividad" placeholder="Actividad (ej: Jazz)">
+    <select id="nuevoProfesor">
+      <option value="">Sin asignar</option>
+      ${d.profesoresDB.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('')}
+    </select>
+    <button class="btn secondary" id="agregarHorario">+ Agregar clase</button>
+  </div>
+  <div class="card">
+    <h2>Estadística: pagaron y no fueron / fueron 1 vez</h2>
+    ${d.alumnos.filter(a=>a.cuotaPagada && a.clasesAsistidas<=1).map(a=>`
+    <div class="row">
+      <span>${a.nombre} <span class="sub">(${a.clasesAsistidas}/${a.clasesTotales} clases)</span></span>
+      <button class="btn secondary recordatorioBtn" data-nombre="${a.nombre}" style="width:auto;margin:0;">Enviar recordatorio</button>
+    </div>`).join('') || '<div class="sub">Nadie en esta situación este mes</div>'}
+  </div>
+  <div class="card">
+    <h2>Promociones, descuentos y bonos por alumno</h2>
+    ${d.alumnos.map(a=>`<div class="row"><span>${a.nombre}</span><span class="sub">${a.beneficio||'Sin beneficio asignado'}</span></div>`).join('')}
+    <label>Alumno</label>
+    <select id="beneficioAlumno">${d.alumnos.map(a=>`<option value="${a.nombre}">${a.nombre}</option>`).join('')}</select>
+    <label>Tipo</label>
+    <select id="beneficioTipo"><option>Descuento</option><option>Bono</option><option>Regalo / bonificación</option></select>
+    <label>Detalle</label>
+    <input id="beneficioDetalle" placeholder="Ej: 10% por 2 meses">
+    <button class="btn secondary" id="asignarBeneficio">+ Asignar beneficio</button>
+  </div>
+  <div class="card">
+    <h2>Promociones activas</h2>
+    <ul>${d.promociones.map(p=>`<li>${p}</li>`).join('')}</ul>
+    <button class="btn secondary">+ Nueva promoción</button>
+  </div>
+  <div class="card">
+    <h2>Crear evento</h2>
+    <label>Nombre del evento</label>
+    <input id="evNombre" placeholder="Ej: Clase abierta de Boxeo">
+    <label>Precio (para alumnos e invitados)</label>
+    <input id="evPrecio" placeholder="Ej: $5.000">
+    <button class="btn" id="crearEvento">Crear + generar link de pago</button>
+    <div id="evMsg" class="msg hidden"></div>
+  </div>
+  <div class="card">
+    <h2>Eventos creados</h2>
+    ${d.eventos.length===0?'<div class="sub">Todavía no creaste eventos</div>':
+      d.eventos.map(e=>`<div class="row"><span>${e.nombre} — ${e.precio}</span><span class="sub">${e.link}</span></div>`).join('')}
+  </div>
+  <div class="card">
+    <h2>Mensajería</h2>
+    <label>Enviar a</label>
+    <select><option>Todos los alumnos</option><option>Grupo Boxeo</option><option>Grupo Funcional</option></select>
+    <label>Mensaje</label>
+    <textarea rows="3" placeholder="Escribí el mensaje o flyer del evento..."></textarea>
+    <button class="btn secondary">Enviar</button>
+  </div>`;
+}
+
+function attachHandlers(){
+  const pagarBtn = document.getElementById('pagarBtn');
+  if(pagarBtn) pagarBtn.onclick = ()=>{
+    document.getElementById('pagoMsg').classList.remove('hidden');
+  };
+  document.querySelectorAll('.tomarAsist').forEach(b=>b.onclick=()=>{
+    state.profesor.clases[b.dataset.i].asistieron = true;
+    render();
+  });
+  document.querySelectorAll('.presenteCheck').forEach(chk=>chk.onchange=()=>{
+    state.profesor.clases[chk.dataset.i].listado[chk.dataset.idx].presente = chk.checked;
+  });
+  document.querySelectorAll('.noDicto').forEach(b=>b.onclick=()=>{
+    alert('Se avisó al director que no se dicta esta clase.');
+  });
+  document.querySelectorAll('.recuperarBtn').forEach(b=>b.onclick=()=>{
+    state.alumno.faltadas[b.dataset.i].recuperada = true;
+    render();
+  });
+  document.querySelectorAll('.agregarAlumnoBtn').forEach(b=>b.onclick=()=>{
+    const i = b.dataset.i;
+    const nombre = document.querySelector(`.nuevoAlumnoNombre[data-i="${i}"]`).value.trim();
+    const estado = document.querySelector(`.nuevoAlumnoEstado[data-i="${i}"]`).value;
+    if(!nombre) return;
+    state.profesor.clases[i].extras.push({nombre, estado});
+    render();
+  });
+  document.querySelectorAll('.registrarPago').forEach(b=>b.onclick=()=>{
+    const clase = state.profesor.clases[b.dataset.i];
+    const extra = clase.extras.find(e=>e.nombre===b.dataset.nombre);
+    extra.estado = 'pagado';
+    render();
+  });
+  const agregarProfesor = document.getElementById('agregarProfesor');
+  if(agregarProfesor) agregarProfesor.onclick = async ()=>{
+    const nombre = document.getElementById('nuevoProfesorNombre').value.trim();
+    if(!nombre) return;
+    await sb.from('profesores').insert({nombre});
+    await cargarDatosDirector();
+  };
+  document.querySelectorAll('.borrarCategoria').forEach(b=>b.onclick=async ()=>{
+    await sb.from('categorias').delete().eq('id', b.dataset.id);
+    await cargarDatosDirector();
+  });
+  const agregarCategoria = document.getElementById('agregarCategoria');
+  if(agregarCategoria) agregarCategoria.onclick = async ()=>{
+    const nombre = document.getElementById('nuevaCategoria').value.trim();
+    const rubro = document.getElementById('rubroCategoria').value;
+    if(!nombre) return;
+    await sb.from('categorias').insert({nombre, rubro});
+    await cargarDatosDirector();
+  };
+  document.querySelectorAll('.asignarProfesor').forEach(sel=>sel.onchange=async ()=>{
+    await sb.from('clases').update({profesor_id: sel.value || null}).eq('id', sel.dataset.id);
+    await cargarDatosDirector();
+  });
+  document.querySelectorAll('.borrarHorario').forEach(b=>b.onclick=async ()=>{
+    await sb.from('clases').delete().eq('id', b.dataset.id);
+    await cargarDatosDirector();
+  });
+  const agregarHorario = document.getElementById('agregarHorario');
+  if(agregarHorario) agregarHorario.onclick = async ()=>{
+    const dia = document.getElementById('nuevoDia').value.trim();
+    const horario = document.getElementById('nuevoHorario').value.trim();
+    const actividad = document.getElementById('nuevaActividad').value.trim();
+    const profesor_id = document.getElementById('nuevoProfesor').value || null;
+    if(!dia || !horario || !actividad) return;
+    await sb.from('clases').insert({dia, horario, actividad, profesor_id});
+    await cargarDatosDirector();
+  };
+  const crearEvento = document.getElementById('crearEvento');
+  if(crearEvento) crearEvento.onclick = ()=>{
+    const nombre = document.getElementById('evNombre').value || 'Evento sin nombre';
+    const precio = document.getElementById('evPrecio').value || '$0';
+    const link = 'pago.app/ev-' + Math.random().toString(36).slice(2,7);
+    state.director.eventos.push({nombre,precio,link});
+    render();
+  };
+  document.querySelectorAll('.recordatorioBtn').forEach(b=>b.onclick=()=>{
+    alert(`Mensaje enviado a ${b.dataset.nombre}: "Tenés clases a favor este mes, ¡te esperamos!"`);
+  });
+  const asignarBeneficio = document.getElementById('asignarBeneficio');
+  if(asignarBeneficio) asignarBeneficio.onclick = ()=>{
+    const nombre = document.getElementById('beneficioAlumno').value;
+    const tipo = document.getElementById('beneficioTipo').value;
+    const detalle = document.getElementById('beneficioDetalle').value.trim();
+    const alumno = state.director.alumnos.find(a=>a.nombre===nombre);
+    alumno.beneficio = detalle ? `${tipo}: ${detalle}` : tipo;
+    render();
+  };
+}
+
+document.querySelectorAll('.roles button').forEach(btn=>{
+  btn.onclick = async ()=>{
+    document.querySelectorAll('.roles button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.role = btn.dataset.role;
+    if(state.role==='director') await cargarDatosDirector();
+    else render();
+  };
+});
+</script>
+</body>
+</html>
